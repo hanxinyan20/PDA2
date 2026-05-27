@@ -589,30 +589,11 @@ class RAMBOData:
 
         
 def flipped_datasets(x, y, feature_names):
-    # 查找名为'race_white', 'race_black', 'race_am_ind', 'race_alaska', 'race_am_alaska', 'race_asian', 
-    # 'race_hawaiian', 'race_other', 'race_two_or_more'  的特征下标
-    # race_indexes = []
-    # for i, feature_name in enumerate(feature_names):
-    #     if feature_name.startswith('race'):
-    #         race_indexes.append(i)
-    # # 把x的race_indexes随机打乱
-    # x_race_flipped = x.clone()  # 复制原始数据以避免修改原始数据
-    # race_combinations = x_race_flipped[:, race_indexes]
-    # unique_race_combinations, counts = torch.unique(race_combinations, dim=0, return_counts=True)
-    # # print
-    # for i, (combination, count) in enumerate(zip(unique_race_combinations, counts)):
-    #     print(f"Race Combination {i}: {combination}, Count: {count}")
-    # # 找到出现次数最少的组合
-    # min_count_idx = torch.argmin(counts)  # 找到最小的计数索引
-    # min_count_combination = unique_race_combinations[min_count_idx]  # 对应的唯一值
-    # x_race_flipped[:, race_indexes] = min_count_combination
-    
-    # 查找married', 'widowed', 'divorced', 'separated', 'never'
     marital_indexes = []
     for i, feature_name in enumerate(feature_names):
         if feature_name in ['married', 'widowed', 'divorced', 'separated', 'never']:
             marital_indexes.append(i)
-    # 查找'big_occp_MGR', 'big_occp_BUS', 'big_occp_FIN', 'big_occp_CMM', 'big_occp_ENG', 'big_occp_SCI', 'big_occp_CMS', 'big_occp_EDU', 'big_occp_ENT', 'big_occp_MED', 'big_occp_HLS', 'big_occp_PRT', 'big_occp_EAT', 'big_occp_CLN', 'big_occp_PRS', 'big_occp_SAL', 'big_occp_OFF', 'big_occp_FFF', 'big_occp_CON', 'big_occp_EXT', 'big_occp_RPR', 'big_occp_PRD', 'big_occp_TRN', 'big_occp_MIL', 'big_occp_no'
+    
     x_marital_flipped = x.clone()
     marital_combinations = x_marital_flipped[:, marital_indexes]
     unique_marital_combinations, counts = torch.unique(marital_combinations, dim=0, return_counts=True)
@@ -702,8 +683,8 @@ def white_noise_datasets(x, y, feature_names):
     datasets.append(ACSDataset(clone(x).to('cuda'), clone(y), state_name="no_noise"))
 
     for noise_level in noise_levels:
-        y_noisy = clone(y).to('cuda')  # 复制 y 以避免修改原始数据
-        num_samples = y.size(0)  # 样本数量
+        y_noisy = clone(y).to('cuda')  
+        num_samples = y.size(0) 
         num_noisy_samples = int(num_samples * noise_level)  # 计算污染样本数量（50%）
         noisy_indices = torch.randperm(num_samples)[:num_noisy_samples]
         noise = torch.normal(mean=2, std=1.0, size=(num_noisy_samples, 1)).to('cuda')
@@ -778,20 +759,19 @@ def dataset_split_equal(dataset, val_samples):
     Returns:
         Subset: A subset of the dataset with balanced classes.
     """
-    # 获取目标标签
+
     targets = dataset.y.cpu()
-    # print("val samples: ", val_samples)
-    # 获取所有类别
+
     classes = torch.unique(targets).tolist()
     selected_indices = []
     samples_per_class = val_samples // len(classes)
     
-    # 对每个类别采样固定数量
+
     for cls in classes:
         indices = (targets == cls).nonzero(as_tuple=True)[0]
         selected_indices.extend(indices[:samples_per_class].tolist())
 
-    # 创建平衡后的数据集
+ 
     val_subset = Subset(dataset, selected_indices)
 
 
@@ -808,14 +788,12 @@ def sample_from_dataset(dataset, n_samples):
     subset = Subset(dataset, indices)
     loader = DataLoader(subset, batch_size=n_samples, shuffle=False)
     return next(iter(loader))        
-    # 取前n_samples个样本
+
 
 
 
 if __name__ == "__main__":
-    # X, Y, _ = get_USAccident("CA", need_preprocess=True, root_dir='data/accident/US_Accidents_Dec21_updated.csv')
-    # print(X.shape, Y.shape)
-    # print(X[0], Y[0])
+
     raw_X = preprocess('data/accident/US_Accidents_Dec21_updated.csv')
-    # 保存raw_x到本地
+
     raw_X.to_csv('data/accident/US_Accidents_Dec21_updated_rawx.csv', index=False)
